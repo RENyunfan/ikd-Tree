@@ -5,27 +5,24 @@
 
 
 #include "ikd_Tree.h"
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <random>
-#include <algorithm>
 #include "pcl/point_types.h"
-#include "pcl/common/common.h"
 #include "pcl/point_cloud.h"
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
 using PointType = pcl::PointXYZ;
 using PointVector = KD_TREE<PointType>::PointVector;
-
-void colorize( const PointVector &pc, pcl::PointCloud<pcl::PointXYZRGB> &pc_colored, const std::vector<int> &color) {
+using namespace  std::chrono;
+void colorize(const PointVector& pc, pcl::PointCloud<pcl::PointXYZRGB>& pc_colored, const std::vector<int>& color) {
     int N = pc.size();
 
     pc_colored.clear();
     pcl::PointXYZRGB pt_tmp;
 
     for (int i = 0; i < N; ++i) {
-        const auto &pt = pc[i];
+        const auto& pt = pc[i];
         pt_tmp.x = pt.x;
         pt_tmp.y = pt.y;
         pt_tmp.z = pt.z;
@@ -36,10 +33,10 @@ void colorize( const PointVector &pc, pcl::PointCloud<pcl::PointXYZRGB> &pc_colo
     }
 }
 
-void generate_box(BoxPointType &boxpoint, const PointType &center_pt, vector<float> box_lengths) {
-    float &x_dist = box_lengths[0];
-    float &y_dist = box_lengths[1];
-    float &z_dist = box_lengths[2];
+void generate_box(BoxPointType& boxpoint, const PointType& center_pt, std::vector<float> box_lengths) {
+    float& x_dist = box_lengths[0];
+    float& y_dist = box_lengths[1];
+    float& z_dist = box_lengths[2];
 
     boxpoint.vertex_min[0] = center_pt.x - x_dist;
     boxpoint.vertex_max[0] = center_pt.x + x_dist;
@@ -49,26 +46,26 @@ void generate_box(BoxPointType &boxpoint, const PointType &center_pt, vector<flo
     boxpoint.vertex_max[2] = center_pt.z + z_dist;
 }
 
-int main(int argc, char **argv) {
+int main() {
     /*** 1. Initialize k-d tree */
     KD_TREE<PointType>::Ptr kdtree_ptr(new KD_TREE<PointType>(0.3, 0.6, 0.2));
-    KD_TREE<PointType>      &ikd_Tree        = *kdtree_ptr;
+    KD_TREE<PointType>& ikd_Tree = *kdtree_ptr;
 
     /*** 2. Load point cloud data */
     pcl::PointCloud<PointType>::Ptr src(new pcl::PointCloud<PointType>);
-    string filename = "../materials/hku_demo_pointcloud.pcd";
+    std::string filename = "../materials/small_forest_002.pcd";
     if (pcl::io::loadPCDFile<PointType>(filename, *src) == -1) //* load the file
     {
-        PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
+        PCL_ERROR("Couldn't read file test_pcd.pcd \n");
         return (-1);
     }
     printf("Original: %d points are loaded\n", static_cast<int>(src->points.size()));
 
     /*** 3. Build ikd-Tree */
-    auto start = chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
     ikd_Tree.Build((*src).points);
-    auto end      = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::microseconds>(end - start).count();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     printf("Building tree takes: %0.3f ms\n", float(duration) / 1e3);
     printf("# of valid points: %d \n", ikd_Tree.validnum());
 
@@ -80,11 +77,11 @@ int main(int argc, char **argv) {
     BoxPointType boxpoint;
     generate_box(boxpoint, center_pt, {10.0, 10.0, 20.0});
 
-    start = chrono::high_resolution_clock::now();
-    vector<BoxPointType> boxes = {boxpoint};
+    start = std::chrono::high_resolution_clock::now();
+    std::vector<BoxPointType> boxes = {boxpoint};
     int num_deleted = ikd_Tree.Delete_Point_Boxes(boxes);
-    end  = chrono::high_resolution_clock::now();
-    duration = chrono::duration_cast<chrono::microseconds>(end - start).count();
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     printf("Removal by box takes: %0.3f ms\n", float(duration) / 1e3);
 
     /*** NOTE. Check the removed points
@@ -115,17 +112,18 @@ int main(int argc, char **argv) {
     colorize(Removed_Points, *removed_colored, {255, 0, 0});
 
     pcl::visualization::PCLVisualizer viewer0("Points removed from ikd-Tree");
-    viewer0.addPointCloud<PointType>(src,src_color, "src");
+    viewer0.addPointCloud<PointType>(src, src_color, "src");
     viewer0.addPointCloud<pcl::PointXYZRGB>(removed_colored, "removed");
-    viewer0.setCameraPosition(-5, 30, 175,  0, 0, 0, 0.2, -1.0, 0.2);
+    viewer0.setCameraPosition(-5, 30, 175, 0, 0, 0, 0.2, -1.0, 0.2);
     viewer0.setSize(1600, 900);
 
     pcl::visualization::PCLVisualizer viewer1("Map after Delete");
-    viewer1.addPointCloud<PointType>(Remaining_Points,remaining_color, "remain");
-    viewer1.setCameraPosition(-5, 30, 175,  0, 0, 0, 0.2, -1.0, 0.2);
+    viewer1.addPointCloud<PointType>(Remaining_Points, remaining_color, "remain");
+    viewer1.setCameraPosition(-5, 30, 175, 0, 0, 0, 0.2, -1.0, 0.2);
     viewer1.setSize(1600, 900);
 
-    while (!viewer0.wasStopped() && !viewer1.wasStopped()) {// } && !viewer2.wasStopped()) {
+    while (!viewer0.wasStopped() && !viewer1.wasStopped()) {
+        // } && !viewer2.wasStopped()) {
         viewer0.spinOnce();
         viewer1.spinOnce();
     }

@@ -5,13 +5,15 @@
 */
 
 #include <ikd_Tree.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <random>
 #include <algorithm>
+#include <chrono>
 
 using PointType = ikdTree_PointType;
 using PointVector = KD_TREE<PointType>::PointVector;
+namespace chrono = std::chrono;
 
 #define X_MAX 5.0
 #define X_MIN -5.0
@@ -88,7 +90,7 @@ void generate_increment_point_cloud(int num){
 
 void generate_decrement_point_cloud(int num){
     PointVector ().swap(cloud_decrement);
-    auto rng = default_random_engine();
+    auto rng = std::default_random_engine();
     shuffle(point_cloud.begin(), point_cloud.end(), rng);    
     for (int i=0;i<num;i++){
         cloud_decrement.push_back(point_cloud[point_cloud.size()-1]);
@@ -101,8 +103,8 @@ void generate_decrement_point_cloud(int num){
     Generate random boxes for box-wise re-insertion on the incremental k-d tree
 */
 
-void generate_box_increment(vector<BoxPointType> & Add_Boxes, float box_length, int box_num){
-    vector<BoxPointType> ().swap(Add_Boxes);
+void generate_box_increment(std::vector<BoxPointType> & Add_Boxes, float box_length, int box_num){
+    std::vector<BoxPointType> ().swap(Add_Boxes);
     float d = box_length/2;
     float x_p, y_p, z_p;
     BoxPointType boxpoint;
@@ -137,8 +139,8 @@ void generate_box_increment(vector<BoxPointType> & Add_Boxes, float box_length, 
     Generate random boxes for box-wise delete on the incremental k-d tree
 */
 
-void generate_box_decrement(vector<BoxPointType> & Delete_Boxes, float box_length, int box_num){
-    vector<BoxPointType> ().swap(Delete_Boxes);
+void generate_box_decrement(std::vector<BoxPointType> & Delete_Boxes, float box_length, int box_num){
+    std::vector<BoxPointType> ().swap(Delete_Boxes);
     float d = box_length/2;
     float x_p, y_p, z_p;
     BoxPointType boxpoint;
@@ -182,13 +184,13 @@ PointType generate_target_point(){
 }
 
 int main(int argc, char** argv){
-    srand((unsigned) time(NULL));
+    srand((unsigned) time(nullptr));
     printf("Testing ...\n");
     int counter = 0;
-    bool flag = true;
-    vector<BoxPointType> Delete_Boxes;
-    vector<BoxPointType> Add_Boxes;
-    vector<float> PointDist;
+    // bool flag = true;
+    std::vector<BoxPointType> Delete_Boxes;
+    std::vector<BoxPointType> Add_Boxes;
+    std::vector<float> PointDist;
     float average_total_time = 0.0;
     float box_delete_time = 0.0;
     float box_add_time = 0.0;
@@ -203,7 +205,7 @@ int main(int argc, char** argv){
     auto t1 = chrono::high_resolution_clock::now();
     ikd_Tree.Build(point_cloud);    
     auto t2 = chrono::high_resolution_clock::now();    
-    auto build_duration = chrono::duration_cast<chrono::microseconds>(t2-t1).count();
+    // auto build_duration = chrono::duration_cast<chrono::microseconds>(t2-t1).count();
     while (counter < Test_Time){           
         printf("Test %d:\n",counter+1);
         // Point-wise Insertion

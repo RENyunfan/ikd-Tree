@@ -18,7 +18,7 @@ using PointType = pcl::PointXYZ;
 using PointVector = KD_TREE<PointType>::PointVector;
 template class KD_TREE<pcl::PointXYZ>;
 
-void colorize( const PointVector &pc, pcl::PointCloud<pcl::PointXYZRGB> &pc_colored, const std::vector<int> &color) {
+void colorize( const PointVector &pc, pcl::PointCloud<pcl::PointXYZRGB> &pc_colored, const std::std::vector<int> &color) {
     int N = pc.size();
 
     pc_colored.clear();
@@ -36,7 +36,7 @@ void colorize( const PointVector &pc, pcl::PointCloud<pcl::PointXYZRGB> &pc_colo
     }
 }
 
-void generate_box(BoxPointType &boxpoint, const PointType &center_pt, vector<float> box_lengths) {
+void generate_box(BoxPointType &boxpoint, const PointType &center_pt, std::vector<float> box_lengths) {
     float &x_dist = box_lengths[0];
     float &y_dist = box_lengths[1];
     float &z_dist = box_lengths[2];
